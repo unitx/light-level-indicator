@@ -1,0 +1,23 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Light level indacator",
+    "description": "Light level indacator",
+    "uuid": "07ce4ae8-9e5e-4fa3-9bac-46322d642354",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 21, 130]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "61713e6f-ec2b-48fc-99f5-3c599af7dead",
+      "version": [1, 0, 0]
+    }
+  ],
+  "metadata": {
+    "authors": ["unitx"],
+    "license": "MIT",
+    "product_type": "addon",
+    "generated_with": {}
+  }
+}

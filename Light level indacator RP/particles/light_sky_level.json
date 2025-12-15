@@ -1,0 +1,39 @@
+{
+	"format_version": "1.10.0",
+	"particle_effect": {
+		"description": {
+			"identifier": "light_light_indacator:sky_light_level",
+			"basic_render_parameters": {
+				"material": "particles_alpha",
+				"texture": "textures/particles/sky_light_level_indacator"
+			}
+		},
+		"components": {
+			"minecraft:emitter_rate_instant": {
+				"num_particles": 1
+			},
+			"minecraft:emitter_lifetime_once": {
+				"active_time": 10
+			},
+			"minecraft:emitter_shape_point": {},
+			"minecraft:particle_lifetime_expression": {
+				"max_lifetime": "variable.life"
+			},
+			"minecraft:particle_initial_speed": 0,
+			"minecraft:particle_motion_dynamic": {},
+			"minecraft:particle_appearance_billboard": {
+				"size": ["0.25*variable.scale", "0.1*variable.scale"],
+				"facing_camera_mode": "rotate_xyz",
+				"uv": {
+					"texture_width": 272,
+					"texture_height": 7,
+					"uv": ["Math.floor(variable.index)*17", 0],
+					"uv_size": [17, 7]
+				}
+			},
+			"minecraft:particle_appearance_tinting": {
+				"color": ["variable.color.r", "variable.color.g", "variable.color.b", "variable.color.a"]
+			}
+		}
+	}
+}
