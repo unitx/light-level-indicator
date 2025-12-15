@@ -3,7 +3,7 @@ import shutil
 import json
 from zipfile import ZipFile
 
-ADDON_NAME = "LifeSteal"
+ADDON_NAME = "Light level indacator"
 BASE_DIR = os.path.dirname(__file__)
 BP_DIR = os.path.join(BASE_DIR, f"{ADDON_NAME} BP")
 RP_DIR = os.path.join(BASE_DIR, f"{ADDON_NAME} RP")
