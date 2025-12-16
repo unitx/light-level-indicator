@@ -1,0 +1,59 @@
+light_level_indicator.title=Basic settings
+light_level_indicator.scan_distance_label=§lScan settings
+light_level_indicator.interval_label=§lFrequency settings
+light_level_indicator.style_label=§lDisplay style
+
+light_level_indicator.red_label=Red
+light_level_indicator.green_label=Green
+light_level_indicator.blue_label=Blue
+
+light_level_indicator.scale=Particle scale
+light_level_indicator.scale.tooltip=Changes the scales of particles that display light levels.
+
+light_level_indicator.y_offset=Particle offset
+light_level_indicator.y_offset.tooltip=Moves particle up or down to prevent block clipping.
+
+light_level_indicator.style=Swap rendering style
+light_level_indicator.style.tooltip=Changes how the particles are rendered, either facing the camera or flat on the ground.
+
+light_level_indicator.horizontal_scan_distance=Horizontal scan distance
+light_level_indicator.horizontal_scan_distance.tooltip=Distance to scan for light levels in the xz direction.
+
+light_level_indicator.vertical_scan_distance=Vertical scan distance
+light_level_indicator.vertical_scan_distance.tooltip=Distance to scan for light levels in the y direction.
+
+light_level_indicator.update_interval=Update interval (ticks)
+light_level_indicator.update_interval.tooltip=Rate at which the game updates light levels of blocks.
+
+light_level_indicator.particle_interval=Particle interval (ticks)
+light_level_indicator.particle_interval.tooltip=Rate at which the game renders particles (GPU heavy).
+
+light_level_indicator.render_safe_blocks=Render safe blocks
+light_level_indicator.render_safe_blocks.tooltip=Enables/disables rendering of safe blocks
+
+light_level_indicator.render_unsafe_blocks=Render unsafe blocks
+light_level_indicator.render_unsafe_blocks.tooltip=Enables/disables rendering of unsafe blocks
+
+light_level_indicator.render_dangrus_blocks=Render dangerous blocks
+light_level_indicator.render_dangrus_blocks.tooltip=Enables/disables rendering of dangerous blocks
+
+light_level_indicator.advanced.particle_lifetime=Particle lifetime (ticks)
+light_level_indicator.advanced.particle_lifetime.tooltip=Length of time that particles exist in world.
+
+light_level_indicator.advanced.emitter_calulations=Use emitter calculations
+light_level_indicator.advanced.emitter_calulations.tooltip=The safe/unsafe color sometimes are wrong in the overworld, this fixes it (CPU heavy).
+
+light_level_indicator.advanced.emitter_update_interval=Emitter update interval (ticks)
+light_level_indicator.advanced.emitter_update_interval.tooltip=(If emitter calculations are enabled) Rate at which light sources should be found.
+
+light_level_indicator.advanced.emitter_extended_length=Emitter extended length
+light_level_indicator.advanced.emitter_extended_length.tooltip=(If emitter calculations are enabled) a distanced factor needed to correct for edge cases.
+
+light_level_indicator.advanced.color_dangrus=§lDanger color (rgba)
+light_level_indicator.advanced.color_dangrus.tooltip=Text color of dangerous blocks (rgba).
+
+light_level_indicator.advanced.color_unsafe=§lUnsafe color (rgba)
+light_level_indicator.advanced.color_unsafe.tooltip=Text color of unsafe blocks (rgba).
+
+light_level_indicator.advanced.color_safe=§lSafe color (rgba)
+light_level_indicator.advanced.color_safe.tooltip=Text color of safe blocks (rgba).

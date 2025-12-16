@@ -1,22 +1,24 @@
 export const defaultSettings={
-    "light_level_indacator:scale":1,                                // Scale of particles
-    "light_level_indacator:style":0,                                // Style of particles flat/facing
-    "light_level_indacator:horizontal_scan_distance":16,            // xz distance to calulate light levels
-    "light_level_indacator:vertical_scan_distance":6,               // y distance to calulate light levels                         
-    "light_level_indacator:y_offset":0.1,                           // Particle offset from block
-    "light_level_indacator:update_interval":10,                     // Period between scans inwhich to update blocks (ticks)
-    "light_level_indacator:emitter_refresh_interval":40,            // Period between updates to the paricles (ticks)
-    "light_level_indacator:emitter_lifetime":20,                    // Period between updates to the paricles (ticks)
-    "light_level_indacator:color_dangrus":{red:1,green:0,blue:0},   // Color of spawnable blocks i.e. red (0-1 float)
-    "light_level_indacator:color_unsafe":{red:1,green:1,blue:0},    // Color of partial spawnable blocks i.e. yellow (0-1 float)
-    "light_level_indacator:color_safe":{red:0,green:1,blue:0},      // Color of non-spawnable blocks i.e. green (0-1 float)
-    "light_level_indacator:emitter_calulations":0,                  // Should ~2x processing power be used to get the correct light level colors? Without it the game displays the wrong colors between green/yellow sometimes
-    "light_level_indacator:emitter_update_interval":40,             // The rate to recalute emitter light producers
-    "light_level_indacator:emitter_extended_length":15,             // To calulate the correct overworld lighting the game calulates light emitted from blocks, horizontal_scan_distance+emitter_extended_length is that distance
-    "light_level_indacator:fade_with_distance": 1,                  // Fade particles with distance
-    "light_level_indacator:render_safe_blocks":1,                   // Enable/Disable rendering of safe blocks
-    "light_level_indacator:render_unsafe_blocks":1,                 // Enable/Disable rendering of unsafe blocks
-    "light_level_indacator:render_dangrus_blocks":1,                // Enable/Disable rendering of dangrus blocks
+    "light_level_indicator:scale":1,                                // Scale of particles
+    "light_level_indicator:style":0,                                // Style of particles flat/facing
+    "light_level_indicator:horizontal_scan_distance":10,            // xz distance to calulate light levels
+    "light_level_indicator:vertical_scan_distance":4,               // y distance to calulate light levels                         
+    "light_level_indicator:y_offset":0.1,                           // Particle offset from block
+    
+    "light_level_indicator:update_interval":10,                     // Period between scans inwhich to update blocks (ticks)
+    "light_level_indicator:particle_interval":40,                   // Period between updates to the paricles (ticks)
+    "light_level_indicator:particle_lifetime":20,                   // Period between updates to the paricles (ticks)
+    "light_level_indicator:emitter_calulations":1,                  // Should ~2x processing power be used to get the correct light level colors? Without it the game displays the wrong colors between green/yellow sometimes
+    "light_level_indicator:emitter_update_interval":40,             // The rate to recalute emitter light producers
+    "light_level_indicator:emitter_extended_length":15,             // To calulate the correct overworld lighting the game calulates light emitted from blocks, horizontal_scan_distance+emitter_extended_length is that distance
+    
+    "light_level_indicator:color_dangrus":{red:1,green:0,blue:0},   // Color of spawnable blocks i.e. red (0-1 float)
+    "light_level_indicator:color_unsafe":{red:1,green:1,blue:0},    // Color of partial spawnable blocks i.e. yellow (0-1 float)
+    "light_level_indicator:color_safe":{red:0,green:1,blue:0},      // Color of non-spawnable blocks i.e. green (0-1 float)
+   
+    "light_level_indicator:render_safe_blocks":1,                   // Enable/Disable rendering of safe blocks
+    "light_level_indicator:render_unsafe_blocks":1,                 // Enable/Disable rendering of unsafe blocks
+    "light_level_indicator:render_dangrus_blocks":1,                // Enable/Disable rendering of dangrus blocks
 }
 
 export const lightEmittingBlocks = {
@@ -158,8 +160,26 @@ export const lightEmittingBlocks = {
 export const transparentBlocks = [
     "minecraft:air",
     "minecraft:water",
-    "minecraft:short_grass",
+    "minecraft:bubble_column",
+    "minecraft:flowing_water",
+    "minecraft:flowing_lava",
     "minecraft:lava",
-    "minecraft:tall_grass",
-    "minecraft:moss_carpet"
+    "minecraft:barrier",
+    "minecraft:vine",
+    "minecraft:light_block_0",
+    "minecraft:light_block_1",
+    "minecraft:light_block_2",
+    "minecraft:light_block_3",
+    "minecraft:light_block_4",
+    "minecraft:light_block_5",
+    "minecraft:light_block_6",
+    "minecraft:light_block_7",
+    "minecraft:light_block_8",
+    "minecraft:light_block_9",
+    "minecraft:light_block_10",
+    "minecraft:light_block_11",
+    "minecraft:light_block_12",
+    "minecraft:light_block_13",
+    "minecraft:light_block_14",
+    "minecraft:light_block_15",
 ]

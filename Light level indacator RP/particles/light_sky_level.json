@@ -2,10 +2,10 @@
 	"format_version": "1.10.0",
 	"particle_effect": {
 		"description": {
-			"identifier": "light_light_indacator:sky_light_level",
+			"identifier": "light_light_indicator:sky_light_level",
 			"basic_render_parameters": {
 				"material": "particles_alpha",
-				"texture": "textures/particles/sky_light_level_indacator"
+				"texture": "textures/particles/sky_light_level_indicator"
 			}
 		},
 		"components": {
@@ -32,7 +32,7 @@
 				}
 			},
 			"minecraft:particle_appearance_tinting": {
-				"color": ["variable.color.r", "variable.color.g", "variable.color.b", "variable.color.a"]
+				"color": ["variable.color.r", "variable.color.g", "variable.color.b", 1]
 			}
 		}
 	}

@@ -1,8 +1,8 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Light level indacator",
-    "description": "Light level indacator",
+    "name": "Light level indicator",
+    "description": "Light level indicator",
     "uuid": "07ce4ae8-9e5e-4fa3-9bac-46322d642354",
     "version": [1, 0, 0],
     "min_engine_version": [1, 21, 130]
