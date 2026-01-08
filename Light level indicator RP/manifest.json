@@ -1,8 +1,8 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Light level indicator",
-    "description": "Light level indicator",
+    "name": "Light level indicator (RP)",
+    "description": "Light level indicator is a addon allowing you to visualy see the light level of blocks around you, allowing you to see if the block is spawnable. For more infomation check out the github wiki: https://github.com/unitx/light-level-indicator/wiki",
     "uuid": "07ce4ae8-9e5e-4fa3-9bac-46322d642354",
     "version": [1, 0, 0],
     "min_engine_version": [1, 21, 130]
