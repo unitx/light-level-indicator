@@ -1,0 +1,59 @@
+﻿lightlevelindicator.title=Configuración básica
+lightlevelindicator.scan_distance_label=§lConfiguración de escaneo
+lightlevelindicator.interval_label=§lConfiguración de frecuencia
+lightlevelindicator.style_label=§lEstilo de visualización
+
+lightlevelindicator.red_label=Rojo
+lightlevelindicator.green_label=Verde
+lightlevelindicator.blue_label=Azul
+
+lightlevelindicator.scale=Escala de partículas
+lightlevelindicator.scale.tooltip=Cambia la escala de las partículas que muestran los niveles de luz.
+
+lightlevelindicator.y_offset=Desplazamiento de partículas
+lightlevelindicator.y_offset.tooltip=Mueve las partículas hacia arriba o abajo para evitar que se superpongan con los bloques.
+
+lightlevelindicator.style=Cambiar estilo de renderizado
+lightlevelindicator.style.tooltip=Cambia la forma en que se renderizan las partículas, ya sea orientadas a la cámara o planas sobre el suelo.
+
+lightlevelindicator.horizontal_scan_distance=Distancia de escaneo horizontal
+lightlevelindicator.horizontal_scan_distance.tooltip=Distancia para escanear los niveles de luz en la dirección XZ.
+
+lightlevelindicator.vertical_scan_distance=Distancia de escaneo vertical
+lightlevelindicator.vertical_scan_distance.tooltip=Distancia para escanear los niveles de luz en la dirección Y.
+
+lightlevelindicator.update_interval=Intervalo de actualización (ticks)
+lightlevelindicator.update_interval.tooltip=Frecuencia con la que el juego actualiza los niveles de luz de los bloques.
+
+lightlevelindicator.particle_interval=Intervalo de partículas (ticks)
+lightlevelindicator.particle_interval.tooltip=Frecuencia con la que el juego renderiza las partículas (uso intensivo de GPU).
+
+lightlevelindicator.render_safe_blocks=Renderizar bloques seguros
+lightlevelindicator.render_safe_blocks.tooltip=Activa o desactiva el renderizado de bloques seguros
+
+lightlevelindicator.render_unsafe_blocks=Renderizar bloques inseguros
+lightlevelindicator.render_unsafe_blocks.tooltip=Activa o desactiva el renderizado de bloques inseguros
+
+lightlevelindicator.render_dangerous_blocks=Renderizar bloques peligrosos
+lightlevelindicator.render_dangerous_blocks.tooltip=Activa o desactiva el renderizado de bloques peligrosos
+
+lightlevelindicator.advanced.particle_lifetime=Duración de las partículas (ticks)
+lightlevelindicator.advanced.particle_lifetime.tooltip=Tiempo durante el cual las partículas existen en el mundo.
+
+lightlevelindicator.advanced.emitter_calulations=Usar cálculos del emisor
+lightlevelindicator.advanced.emitter_calulations.tooltip=A veces el color seguro/inseguro es incorrecto en el overworld; esto lo corrige (uso intensivo de CPU).
+
+lightlevelindicator.advanced.emitter_update_interval=Intervalo de actualización del emisor (ticks)
+lightlevelindicator.advanced.emitter_update_interval.tooltip=(Si los cálculos del emisor están activados) Frecuencia con la que se deben localizar las fuentes de luz.
+
+lightlevelindicator.advanced.emitter_extended_length=Longitud extendida del emisor
+lightlevelindicator.advanced.emitter_extended_length.tooltip=(Si los cálculos del emisor están activados) Factor de distancia necesario para corregir casos límite.
+
+lightlevelindicator.advanced.color_dangerous=§lColor peligroso (rgb)
+lightlevelindicator.advanced.color_dangerous.tooltip=Color del texto de los bloques peligrosos (rgb).
+
+lightlevelindicator.advanced.color_unsafe=§lColor inseguro (rgb)
+lightlevelindicator.advanced.color_unsafe.tooltip=Color del texto de los bloques inseguros (rgb).
+
+lightlevelindicator.advanced.color_safe=§lColor seguro (rgb)
+lightlevelindicator.advanced.color_safe.tooltip=Color del texto de los bloques seguros (rgb).

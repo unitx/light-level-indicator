@@ -1,0 +1,36 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Light level indicator (BP)",
+    "description": "Light level indicator is a addon allowing you to visualy see the light level of blocks around you, allowing you to see if the block is spawnable. For more infomation check out the github wiki: https://github.com/unitx/light-level-indicator/wiki",
+    "uuid": "ef4b3033-32df-49af-bf78-31d5049d0954",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 21, 130]
+  },
+  "modules": [
+    {
+      "type": "data",
+      "uuid": "beec78fe-0186-4091-becb-76081f5c07e4",
+      "version": [1, 0, 0]
+    },
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "f45cf774-7a99-4fc0-8ed1-afc7893cd217",
+      "entry": "scripts/main.js",
+      "version": [1, 0, 0]
+    }
+  ],
+  "metadata": {
+    "authors": ["unitx"],
+    "license": "MIT",
+    "product_type": "addon",
+    "generated_with": {}
+  },
+  "dependencies": [
+    {"module_name": "@minecraft/server", "version": "2.4.0"},
+    {"module_name": "@minecraft/server-ui", "version": "2.0.0"},
+    {"uuid": "07ce4ae8-9e5e-4fa3-9bac-46322d642354", "version": [1, 0, 0]}
+  ],
+  "capabilities": ["pbr"]
+}
