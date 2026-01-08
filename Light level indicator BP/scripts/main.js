@@ -291,67 +291,77 @@ class LightLevelState {
       }
     }
   }
-
+  // Creates a list of light source that are used to correctly detect if a block is safe
   updateLightSources(center){
-    let blocks
+    let blocks;
     const maxDistance = settings["lightlevelindicator:horizontal_scan_distance"] + settings["lightlevelindicator:emitter_extended_length"];
     const min = {x: center.x - maxDistance, y: center.y - maxDistance, z: center.z - maxDistance};
     const max = {x: center.x + maxDistance, y: center.y + maxDistance, z: center.z + maxDistance};
-    if(min.y < this.hight_min) min.y = this.hight_min; 
+    if(min.y < this.hight_min) min.y = this.hight_min;
     if(max.y > this.hight_max) max.y = this.hight_max;
-    try{blocks = this.dimension.getBlocks(new Mc.BlockVolume(min,max), {includeTypes: lightBlockIds},true);}catch(e){return;}
+    try{
+      blocks = this.dimension.getBlocks(new Mc.BlockVolume(min,max), {includeTypes: lightBlockIds}, true);
+    }catch(e){return;}
 
-    const newSources = new Map();
+    this._nextSources ??= new Map();
+    const newSources = this._nextSources;
+    newSources.clear();
+
     for(const loc of blocks.getBlockLocationIterator()){
-      const key = `${loc.x},${loc.y},${loc.z}`;
       const block = this.dimension.getBlock(loc);
       if(!block) continue;
-      let level;
 
+      let level;
       const data = lightEmittingBlocks[block.typeId];
       if (data !== undefined) {
         if (typeof data !== "object") level = data;
         else {
           const blockStates = block.permutation.getAllStates();
-          for(const [key,value] of Object.entries(data)){
+          for(const [k,v] of Object.entries(data)){
             let match = true;
-            for(let k in value) if(!(k in blockStates) || value[k] !== blockStates[k]) { match = false; break; }
-            if(match) { level = parseInt(key); break; }
+            for(const s in v){
+              if(blockStates[s] !== v[s]){ match = false; break; }
+            }
+            if(match){ level = +k; break; }
           }
         }
       }
       if(!level || !light_flood_fill[level]) continue;
-      newSources.set(key, {loc, level});
+
+      newSources.set(this.pack(loc.x,loc.y,loc.z), {loc, level});
     }
 
-    
     for(const [key, source] of this.lightSources){
       if(!newSources.has(key)){
-        const block = source.loc;
-        for(const offsetStr of light_flood_fill[source.level]){
-          const [ox, oy, oz] = offsetStr.split(',').map(Number);
-          const bkey = `${block.x+ox},${block.y+oy},${block.z+oz}`;
-          const count = this.artificialLight.get(bkey);
-          if(count <= 1) this.artificialLight.delete(bkey);
-          else if(count > 1) this.artificialLight.set(bkey, count-1);
+        const b = source.loc;
+        for(const off of light_flood_fill[source.level]){
+          const [ox,oy,oz] = off.split(',').map(Number);
+          const k = this.pack(b.x+ox,b.y+oy,b.z+oz);
+          const c = this.artificialLight.get(k);
+          if(c <= 1) this.artificialLight.delete(k);
+          else this.artificialLight.set(k, c-1);
         }
       }
     }
+
     for(const [key, source] of newSources){
       if(!this.lightSources.has(key)){
-        const block = source.loc;
-        for(const offsetStr of light_flood_fill[source.level]){
-          const [ox, oy, oz] = offsetStr.split(',').map(Number);
-          const bkey = `${block.x+ox},${block.y+oy},${block.z+oz}`;
-          const prev = this.artificialLight.get(bkey) ?? 0;
-          this.artificialLight.set(bkey, prev+1);
+        const b = source.loc;
+        for(const off of light_flood_fill[source.level]){
+          const [ox,oy,oz] = off.split(',').map(Number);
+          const k = this.pack(b.x+ox,b.y+oy,b.z+oz);
+          this.artificialLight.set(k, (this.artificialLight.get(k) ?? 0) + 1);
         }
       }
     }
-    this.lightSources = newSources;
+
+    this.lightSources.clear();
+    for(const [k,v] of newSources) this.lightSources.set(k,v);
   }
 
-  
+  // Packs locations into more efficent format
+  pack(x,y,z){return (x & 0x3FFFFFF) << 38 | (y & 0xFFF) << 26 | (z & 0x3FFFFFF);}
+
   // Calulate light levels of blocks within players range
   findValidBlocks(points, dimension, center) {
     this.sky_light = false;
@@ -401,8 +411,6 @@ class LightLevelState {
     }
     return validBlocks;
 }
-
-
 }
 
 // During the specifiyed run interval update and render light levels specific players, at each specifyed interval
