@@ -4,9 +4,10 @@ import { defaultSettings, lightEmittingBlocks, transparentBlocks } from "./setti
 // Define global variables
 let settings = JSON.parse(JSON.stringify(defaultSettings));
 let light_detector = 0; let light_emitter = 0; let light_render = 0; let players=[];
-let shape, shapeOffsets;
-const light_flood_fill = {};
-const lightFloodFillOffsets = {};
+let shape;
+let shapeOffsets = [];
+let light_flood_fill = {};
+let lightFloodFillOffsets = {};
 
 // Created variable lookups for quick access
 const lightBlockIds = Object.keys(lightEmittingBlocks);
@@ -42,21 +43,37 @@ function generatePoints(horizontal, vertical, step = 1) {
 }
 // Run pre-calulators to speed up phrasing and area calulations
 function preCalulations() {
-  shape = generatePoints(settings["lightlevelindicator:horizontal_scan_distance"], settings["lightlevelindicator:vertical_scan_distance"]);
-	for (let i = 1; i <= 15; i++) light_flood_fill[i] = generatePoints(i, i);
-	  shapeOffsets = Array.from(shape, s => {
-		const i1 = s.indexOf(",");
-		const i2 = s.lastIndexOf(",");
-		return [Number(s.slice(0, i1)), Number(s.slice(i1 + 1, i2)), Number(s.slice(i2 + 1))];
-	});
-	for (let i = 1; i <= 15; i++) {
-		const set = generatePoints(i, i);
-		lightFloodFillOffsets[i] = Array.from(set, s => {
-			const i1 = s.indexOf(",");
-			const i2 = s.lastIndexOf(",");
-			return [Number(s.slice(0, i1)), Number(s.slice(i1 + 1, i2)), Number(s.slice(i2 + 1))];
-		});
-	}
+  shape = generatePoints(
+    settings["lightlevelindicator:horizontal_scan_distance"],
+    settings["lightlevelindicator:vertical_scan_distance"]
+  );
+
+  for (let i = 1; i <= 15; i++) {
+    light_flood_fill[i] = generatePoints(i, i);
+  }
+
+  shapeOffsets = Array.from(shape, s => {
+    const i1 = s.indexOf(",");
+    const i2 = s.lastIndexOf(",");
+    return [
+      +s.slice(0, i1),
+      +s.slice(i1 + 1, i2),
+      +s.slice(i2 + 1)
+    ];
+  });
+
+  for (let i = 1; i <= 15; i++) {
+    const set = light_flood_fill[i];
+    lightFloodFillOffsets[i] = Array.from(set, s => {
+      const i1 = s.indexOf(",");
+      const i2 = s.lastIndexOf(",");
+      return [
+        +s.slice(0, i1),
+        +s.slice(i1 + 1, i2),
+        +s.slice(i2 + 1)
+      ];
+    });
+  }
 }
 
 // Settings menu config for the addon
@@ -292,72 +309,95 @@ class LightLevelState {
     }
   }
   // Creates a list of light source that are used to correctly detect if a block is safe
-  updateLightSources(center){
-    let blocks;
-    const maxDistance = settings["lightlevelindicator:horizontal_scan_distance"] + settings["lightlevelindicator:emitter_extended_length"];
-    const min = {x: center.x - maxDistance, y: center.y - maxDistance, z: center.z - maxDistance};
-    const max = {x: center.x + maxDistance, y: center.y + maxDistance, z: center.z + maxDistance};
-    if(min.y < this.hight_min) min.y = this.hight_min;
-    if(max.y > this.hight_max) max.y = this.hight_max;
-    try{
-      blocks = this.dimension.getBlocks(new Mc.BlockVolume(min,max), {includeTypes: lightBlockIds}, true);
-    }catch(e){return;}
+getEmission(block){
+  this._emissionCache ??= new WeakMap();
+  const perm = block.permutation;
+  let level = this._emissionCache.get(perm);
+  if(level !== undefined) return level;
 
-    this._nextSources ??= new Map();
-    const newSources = this._nextSources;
-    newSources.clear();
-
-    for(const loc of blocks.getBlockLocationIterator()){
-      const block = this.dimension.getBlock(loc);
-      if(!block) continue;
-
-      let level;
-      const data = lightEmittingBlocks[block.typeId];
-      if (data !== undefined) {
-        if (typeof data !== "object") level = data;
-        else {
-          const blockStates = block.permutation.getAllStates();
-          for(const [k,v] of Object.entries(data)){
-            let match = true;
-            for(const s in v){
-              if(blockStates[s] !== v[s]){ match = false; break; }
-            }
-            if(match){ level = +k; break; }
-          }
+  level = 0;
+  const data = lightEmittingBlocks[block.typeId];
+  if(data !== undefined){
+    if(typeof data !== "object") level = data;
+    else{
+      const states = perm.getAllStates();
+      for(const k in data){
+        const v = data[k];
+        let ok = true;
+        for(const s in v){
+          if(states[s] !== v[s]){ ok = false; break; }
         }
-      }
-      if(!level || !light_flood_fill[level]) continue;
-
-      newSources.set(this.pack(loc.x,loc.y,loc.z), {loc, level});
-    }
-
-    for(const [key, source] of this.lightSources){
-      if(!newSources.has(key)){
-        const b = source.loc;
-        for(const off of light_flood_fill[source.level]){
-          const [ox,oy,oz] = off.split(',').map(Number);
-          const k = this.pack(b.x+ox,b.y+oy,b.z+oz);
-          const c = this.artificialLight.get(k);
-          if(c <= 1) this.artificialLight.delete(k);
-          else this.artificialLight.set(k, c-1);
-        }
+        if(ok){ level = +k; break; }
       }
     }
-
-    for(const [key, source] of newSources){
-      if(!this.lightSources.has(key)){
-        const b = source.loc;
-        for(const off of light_flood_fill[source.level]){
-          const [ox,oy,oz] = off.split(',').map(Number);
-          const k = this.pack(b.x+ox,b.y+oy,b.z+oz);
-          this.artificialLight.set(k, (this.artificialLight.get(k) ?? 0) + 1);
-        }
-      }
-    }
-
-    this.lightSources.clear();
-    for(const [k,v] of newSources) this.lightSources.set(k,v);
   }
+  this._emissionCache.set(perm, level);
+  return level;
+}
+
+updateLightSources(center){
+  let blocks;
+  const maxDistance =
+    settings["lightlevelindicator:horizontal_scan_distance"] +
+    settings["lightlevelindicator:emitter_extended_length"];
+
+  const min = {x:center.x-maxDistance,y:center.y-maxDistance,z:center.z-maxDistance};
+  const max = {x:center.x+maxDistance,y:center.y+maxDistance,z:center.z+maxDistance};
+
+  if(min.y < this.hight_min) min.y = this.hight_min;
+  if(max.y > this.hight_max) max.y = this.hight_max;
+
+  try{
+    blocks = this.dimension.getBlocks(
+      new Mc.BlockVolume(min,max),
+      {includeTypes: lightBlockIds},
+      true
+    );
+  }catch{ return; }
+
+  this._nextSources ??= new Map();
+  const newSources = this._nextSources;
+  newSources.clear();
+
+  for(const loc of blocks.getBlockLocationIterator()){
+    const block = this.dimension.getBlock(loc);
+    if(!block) continue;
+
+    const level = this.getEmission(block);
+    if(!level || !lightFloodFillOffsets[level]) continue;
+
+    newSources.set(this.pack(loc.x,loc.y,loc.z), { loc, level });
+  }
+
+  const oldSources = this.lightSources;
+
+  for(const [key, source] of oldSources){
+    if(!newSources.has(key)){
+      const b = source.loc;
+      for(const [ox,oy,oz] of lightFloodFillOffsets[source.level]){
+        const k = this.pack(b.x+ox,b.y+oy,b.z+oz);
+        const c = this.artificialLight.get(k);
+        if(c <= 1) this.artificialLight.delete(k);
+        else this.artificialLight.set(k, c-1);
+      }
+    }
+  }
+
+  for(const [key, source] of newSources){
+    if(!oldSources.has(key)){
+      const b = source.loc;
+      for(const [ox,oy,oz] of lightFloodFillOffsets[source.level]){
+        const k = this.pack(b.x+ox,b.y+oy,b.z+oz);
+        this.artificialLight.set(k, (this.artificialLight.get(k) ?? 0) + 1);
+      }
+    }
+  }
+
+  this.lightSources = newSources;
+  this._nextSources = oldSources;
+}
+
+
 
   // Packs locations into more efficent format
   pack(x,y,z){return (x & 0x3FFFFFF) << 38 | (y & 0xFFF) << 26 | (z & 0x3FFFFFF);}
