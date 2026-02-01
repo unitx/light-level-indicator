@@ -4,10 +4,9 @@ import { defaultSettings, lightEmittingBlocks, transparentBlocks } from "./setti
 // Define global variables
 let settings = JSON.parse(JSON.stringify(defaultSettings));
 let light_detector = 0; let light_emitter = 0; let light_render = 0; let players=[];
-let shape;
-let shapeOffsets = [];
-let light_flood_fill = {};
-let lightFloodFillOffsets = {};
+let shape, shapeOffsets;
+const light_flood_fill = {};
+const lightFloodFillOffsets = {};
 
 // Created variable lookups for quick access
 const lightBlockIds = Object.keys(lightEmittingBlocks);
@@ -43,37 +42,21 @@ function generatePoints(horizontal, vertical, step = 1) {
 }
 // Run pre-calulators to speed up phrasing and area calulations
 function preCalulations() {
-  shape = generatePoints(
-    settings["lightlevelindicator:horizontal_scan_distance"],
-    settings["lightlevelindicator:vertical_scan_distance"]
-  );
-
-  for (let i = 1; i <= 15; i++) {
-    light_flood_fill[i] = generatePoints(i, i);
-  }
-
-  shapeOffsets = Array.from(shape, s => {
-    const i1 = s.indexOf(",");
-    const i2 = s.lastIndexOf(",");
-    return [
-      +s.slice(0, i1),
-      +s.slice(i1 + 1, i2),
-      +s.slice(i2 + 1)
-    ];
-  });
-
-  for (let i = 1; i <= 15; i++) {
-    const set = light_flood_fill[i];
-    lightFloodFillOffsets[i] = Array.from(set, s => {
-      const i1 = s.indexOf(",");
-      const i2 = s.lastIndexOf(",");
-      return [
-        +s.slice(0, i1),
-        +s.slice(i1 + 1, i2),
-        +s.slice(i2 + 1)
-      ];
-    });
-  }
+  shape = generatePoints(settings["lightlevelindicator:horizontal_scan_distance"], settings["lightlevelindicator:vertical_scan_distance"]);
+	for (let i = 1; i <= 15; i++) light_flood_fill[i] = generatePoints(i, i);
+	  shapeOffsets = Array.from(shape, s => {
+		const i1 = s.indexOf(",");
+		const i2 = s.lastIndexOf(",");
+		return [Number(s.slice(0, i1)), Number(s.slice(i1 + 1, i2)), Number(s.slice(i2 + 1))];
+	});
+	for (let i = 1; i <= 15; i++) {
+		const set = generatePoints(i, i);
+		lightFloodFillOffsets[i] = Array.from(set, s => {
+			const i1 = s.indexOf(",");
+			const i2 = s.lastIndexOf(",");
+			return [Number(s.slice(0, i1)), Number(s.slice(i1 + 1, i2)), Number(s.slice(i2 + 1))];
+		});
+	}
 }
 
 // Settings menu config for the addon
@@ -236,29 +219,33 @@ Mc.system.beforeEvents.startup.subscribe((eventData) => {
 
 
 // Class which handles all light indicator operations
-class LightLevelState {
-  // Player constructor to hold each players light infomation if light level indicator is enabled
+class LightLevelState{
   constructor(player){
-    this.player = player;
-    this.location = player.location;
-    this.dimension = player.dimension;
-    this.hight_min=this.dimension.heightRange.min+1
-    this.hight_max=this.dimension.heightRange.max-1
+    this.player=player;
+    this.location=player.location;
+    this.dimension=player.dimension;
+    this.hight_min=this.dimension.heightRange.min+1;
+    this.hight_max=this.dimension.heightRange.max-1;
     this.sky_light=false;
-    this.validBlocks = [];
-    this.lightSources = new Map();
-    this.artificialLight = new Map();
-    this.indicator = this.player.hasTag("lightlevelindicator:show_light_level") ? this.player.hasTag("lightlevelindicator:show_sky_light_level") ? 2 : 0 : this.player.hasTag("lightlevelindicator:show_sky_light_level") ? 1 : 0;
+    this.validBlocks=[];
+    this.lightSources=new Map();
+    this.artificialLight=new Map();
+    this.indicator=this.player.hasTag("lightlevelindicator:show_light_level")?(this.player.hasTag("lightlevelindicator:show_sky_light_level")?2:0):(this.player.hasTag("lightlevelindicator:show_sky_light_level")?1:0);
   }
-  // Update block lighting infomation
+
   update(){
-    this.validBlocks = this.findValidBlocks(shapeOffsets, this.dimension, this.location);
+    this.validBlocks=this.findValidBlocks(shapeOffsets,this.dimension,this.location);
   }
-  // Update emitter block lighting infomation
+
   updateEmitter(){
-    if(this.dimension.id==="minecraft:overworld" && this.sky_light===true && settings["lightlevelindicator:emitter_calulations"]===1) this.updateLightSources(this.location);
-    //Mc.world.sendMessage(`${this.artificialLight.size} ${this.lightSources.size}`)
+    if(this.dimension.id==="minecraft:overworld"&&settings["lightlevelindicator:emitter_calulations"]===1&&this.sky_light===true){
+      this.updateLightSources(this.location);
+    }else{
+      this.lightSources.clear();
+      this.artificialLight.clear();
+    }
   }
+
   // Render particle on all blocks which are valid solid blocks
   render() {
     for (const block of this.validBlocks){
@@ -308,150 +295,99 @@ class LightLevelState {
       }
     }
   }
-  // Creates a list of light source that are used to correctly detect if a block is safe
-getEmission(block){
-  this._emissionCache ??= new WeakMap();
-  const perm = block.permutation;
-  let level = this._emissionCache.get(perm);
-  if(level !== undefined) return level;
 
-  level = 0;
-  const data = lightEmittingBlocks[block.typeId];
-  if(data !== undefined){
-    if(typeof data !== "object") level = data;
-    else{
-      const states = perm.getAllStates();
-      for(const k in data){
-        const v = data[k];
-        let ok = true;
-        for(const s in v){
-          if(states[s] !== v[s]){ ok = false; break; }
-        }
-        if(ok){ level = +k; break; }
-      }
-    }
-  }
-  this._emissionCache.set(perm, level);
-  return level;
-}
-
-updateLightSources(center){
-  let blocks;
-  const maxDistance =
-    settings["lightlevelindicator:horizontal_scan_distance"] +
-    settings["lightlevelindicator:emitter_extended_length"];
-
-  const min = {x:center.x-maxDistance,y:center.y-maxDistance,z:center.z-maxDistance};
-  const max = {x:center.x+maxDistance,y:center.y+maxDistance,z:center.z+maxDistance};
-
-  if(min.y < this.hight_min) min.y = this.hight_min;
-  if(max.y > this.hight_max) max.y = this.hight_max;
-
-  try{
-    blocks = this.dimension.getBlocks(
-      new Mc.BlockVolume(min,max),
-      {includeTypes: lightBlockIds},
-      true
-    );
-  }catch{ return; }
-
-  this._nextSources ??= new Map();
-  const newSources = this._nextSources;
-  newSources.clear();
-
-  for(const loc of blocks.getBlockLocationIterator()){
-    const block = this.dimension.getBlock(loc);
-    if(!block) continue;
-
-    const level = this.getEmission(block);
-    if(!level || !lightFloodFillOffsets[level]) continue;
-
-    newSources.set(this.pack(loc.x,loc.y,loc.z), { loc, level });
-  }
-
-  const oldSources = this.lightSources;
-
-  for(const [key, source] of oldSources){
-    if(!newSources.has(key)){
-      const b = source.loc;
-      for(const [ox,oy,oz] of lightFloodFillOffsets[source.level]){
-        const k = this.pack(b.x+ox,b.y+oy,b.z+oz);
-        const c = this.artificialLight.get(k);
-        if(c <= 1) this.artificialLight.delete(k);
-        else this.artificialLight.set(k, c-1);
-      }
-    }
-  }
-
-  for(const [key, source] of newSources){
-    if(!oldSources.has(key)){
-      const b = source.loc;
-      for(const [ox,oy,oz] of lightFloodFillOffsets[source.level]){
-        const k = this.pack(b.x+ox,b.y+oy,b.z+oz);
-        this.artificialLight.set(k, (this.artificialLight.get(k) ?? 0) + 1);
-      }
-    }
-  }
-
-  this.lightSources = newSources;
-  this._nextSources = oldSources;
-}
-
-
-
-  // Packs locations into more efficent format
-  pack(x,y,z){return (x & 0x3FFFFFF) << 38 | (y & 0xFFF) << 26 | (z & 0x3FFFFFF);}
-
-  // Calulate light levels of blocks within players range
-  findValidBlocks(points, dimension, center) {
-    this.sky_light = false;
-    const validBlocks = [];
-    const transparentSet = transparentBlocksSet;
-    const blockCache = new Map();
-
-    // Make bit key to incress speed
-    function getBlockCached(x, y, z) {
-      const key = (x << 20) ^ (y << 10) ^ z;
-      let block = blockCache.get(key);
-      if (block === undefined) {
-        block = dimension.getBlock({ x, y, z }) ?? null;
-        blockCache.set(key, block);
-      }
-      return block;
-    }
-    const cx = center.x;const cy = center.y;const cz = center.z;
-
-    // Iterate numeric offsets (NO string parsing)
-    for (let i = 0; i < points.length; i++) {
-      const dx = points[i][0];const dy = points[i][1];const dz = points[i][2];
-      const x = cx + dx;let y = cy + dy;const z = cz + dz;
-      if(y < this.hight_min) y = this.hight_min; if(y > this.hight_max) y = this.hight_max;
-      // Check block conditions
-      const airBlock = getBlockCached(x, y, z);
-      if (!airBlock || !transparentSet.has(airBlock.typeId)) continue;
-      const belowBlock = getBlockCached(x, y - 1, z);
-      if (!belowBlock || transparentSet.has(belowBlock.typeId)) continue;
-      // If conditions passed find light levels and push data to array
-      const sky = airBlock.getSkyLightLevel();
-      if (!this.sky_light && sky > 0) this.sky_light = true;
-      let level = 0;
-      const data = lightEmittingBlocks[belowBlock.typeId];
-      if (data !== undefined) {
-        if (typeof data !== "object") level = data;
-        else {
-          const blockStates = belowBlock.permutation.getAllStates();
-          for(const [key,value] of Object.entries(data)){
-            let match = true;
-            for(let k in value) if(!(k in blockStates) || value[k] !== blockStates[k]) { match = false; break; }
-            if(match) { level = parseInt(key); break; }
+  updateLightSources(center){
+    let blocks;
+    const maxDistance=settings["lightlevelindicator:horizontal_scan_distance"]+settings["lightlevelindicator:emitter_extended_length"];
+    const min={x:center.x-maxDistance,y:center.y-maxDistance,z:center.z-maxDistance};
+    const max={x:center.x+maxDistance,y:center.y+maxDistance,z:center.z+maxDistance};
+    if(min.y<this.hight_min)min.y=this.hight_min;
+    if(max.y>this.hight_max)max.y=this.hight_max;
+    try{blocks=this.dimension.getBlocks(new Mc.BlockVolume(min,max),{includeTypes:lightBlockIds},true);}catch{return;}
+    const newSources=new Map();
+    for(const loc of blocks.getBlockLocationIterator()){
+      const block=this.dimension.getBlock(loc);
+      if(!block)continue;
+      let level=0;
+      const data=lightEmittingBlocks[block.typeId];
+      if(data!==undefined){
+        if(typeof data!=="object")level=data;
+        else{
+          const states=block.permutation.getAllStates();
+          for(const k in data){
+            const v=data[k];
+            let ok=true;
+            for(const s in v){if(states[s]!==v[s]){ok=false;break;}}
+            if(ok){level=+k;break;}
           }
         }
       }
-      validBlocks.push({x, y, z,light_level: Math.max(airBlock.getLightLevel(), level),sky_light_level: sky});
+      if(!level||!lightFloodFillOffsets[level])continue;
+      const key=(loc.x|0)+","+(loc.y|0)+","+(loc.z|0);
+      newSources.set(key,{loc,level});
+    }
+    for(const [key,source] of this.lightSources){
+      if(!newSources.has(key)){
+        const b=source.loc;
+        for(const off of lightFloodFillOffsets[source.level]){
+          const k=(b.x+off[0])+","+(b.y+off[1])+","+(b.z+off[2]);
+          const c=this.artificialLight.get(k);
+          if(c<=1)this.artificialLight.delete(k);
+          else this.artificialLight.set(k,c-1);
+        }
+      }
+    }
+    for(const [key,source] of newSources){
+      if(!this.lightSources.has(key)){
+        const b=source.loc;
+        for(const off of lightFloodFillOffsets[source.level]){
+          const k=(b.x+off[0])+","+(b.y+off[1])+","+(b.z+off[2]);
+          this.artificialLight.set(k,(this.artificialLight.get(k)??0)+1);
+        }
+      }
+    }
+    this.lightSources=newSources;
+  }
+
+  findValidBlocks(points,dimension,center){
+    this.sky_light=false;
+    const validBlocks=[];
+    const transparentSet=transparentBlocksSet;
+    const blockCache=new Map();
+    const getBlock=(x,y,z)=>{const k=(x<<20)^(y<<10)^z;let b=blockCache.get(k);if(b===undefined){b=dimension.getBlock({x,y,z})??null;blockCache.set(k,b);}return b;};
+    const cx=center.x,cy=center.y,cz=center.z;
+    for(let i=0;i<points.length;i++){
+      const dx=points[i][0],dy=points[i][1],dz=points[i][2];
+      const x=cx+dx,z=cz+dz;
+      let y=cy+dy;
+      if(y<this.hight_min)y=this.hight_min;
+      if(y>this.hight_max)y=this.hight_max;
+      const air=getBlock(x,y,z);
+      if(!air||!transparentSet.has(air.typeId))continue;
+      const below=getBlock(x,y-1,z);
+      if(!below||transparentSet.has(below.typeId))continue;
+      const sky=air.getSkyLightLevel();
+      if(!this.sky_light&&sky>0)this.sky_light=true;
+      let level=0;
+      const data=lightEmittingBlocks[below.typeId];
+      if(data!==undefined){
+        if(typeof data!=="object")level=data;
+        else{
+          const states=below.permutation.getAllStates();
+          for(const k in data){
+            const v=data[k];
+            let ok=true;
+            for(const s in v){if(states[s]!==v[s]){ok=false;break;}}
+            if(ok){level=+k;break;}
+          }
+        }
+      }
+      validBlocks.push({x,y,z,light_level:Math.max(air.getLightLevel(),level),sky_light_level:sky});
     }
     return validBlocks;
+  }
 }
-}
+
 
 // During the specifiyed run interval update and render light levels specific players, at each specifyed interval
 Mc.system.runInterval(()=>{
@@ -480,9 +416,9 @@ Mc.system.runInterval(()=>{
   if(light_render>=settings["lightlevelindicator:particle_interval"]) {
     light_render=0;
     for(const player of players){
-        let state=playerStates.get(player.id);
-          if(!state){state=new LightLevelState(player);playerStates.set(player.id,state)};
-          state.render();
+      let state=playerStates.get(player.id);
+      if(!state){state=new LightLevelState(player);playerStates.set(player.id,state)};
+      state.render();
     }
   }
   // Update emitter blocks, timer
