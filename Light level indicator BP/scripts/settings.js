@@ -1,7 +1,7 @@
 export const defaultSettings={
     "lightlevelindicator:scale":1,                                // Scale of particles
     "lightlevelindicator:style":0,                                // Style of particles flat/facing
-    "lightlevelindicator:horizontal_scan_distance":12,            // xz distance to calulate light levels
+    "lightlevelindicator:horizontal_scan_distance":8,            // xz distance to calulate light levels
     "lightlevelindicator:vertical_scan_distance":4,               // y distance to calulate light levels                         
     "lightlevelindicator:y_offset":0.1,                           // Particle offset from block
     
